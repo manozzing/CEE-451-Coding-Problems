@@ -24,7 +24,7 @@ Newton_Raphson(1.0, 0.2, 0.5, 10000, 0.000000001)
 B_Array = zeros(1001)
 x_Array = zeros(1001)
 
-# For loop for making 1000-steps of ranges for B and x
+# For loop for getting B and x
 for i in 1:1001
     B_Array[i] = 0.2 + 1.8*(i-1)/1000
     x_Array[i] = Newton_Raphson(4.0, 0.2 + 1.8*(i-1)/1000, 0.5, 10000, 0.000000001)[1]
@@ -38,7 +38,7 @@ plot(B_Array, x_Array, legend = false, title = "The root x per B in Question 3",
 A_Array = zeros(1001)
 x2_Array = zeros(1001)
 
-# For loop for making 1000-steps of ranges for B and x
+# For loop for getting A and x
 for i in 1:1001
     A_Array[i] = 1.0 + 5.0*(i-1)/1000
     x2_Array[i] = Newton_Raphson(1.0 + 5.0*(i-1)/1000, 0.5, 0.5, 10000, 0.000000001)[1]
