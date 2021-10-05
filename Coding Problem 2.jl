@@ -76,3 +76,4 @@ for i in 2:finding_n_2(0.001, 10000)[1]
     I_2[i-1] = integral_2(0.0, 4.0, i)
 end
 I_2
+### Thank you for consideration
