@@ -23,7 +23,7 @@ println("Execution goes well without syntax error")
 
 EulerStepMethod(1.0, 4.0, 5.0, 8, 0.25)
 
-## Error Calculation
+## Error Calculation for Euler Step Method
 function ϵ_Euler(xₐ::Float64, yₐ::Float64, xᵦ::Float64, N::Int64, k::Float64)
     yᵦ_N1, y_c_N1 = EulerStepMethod(xₐ, yₐ, xᵦ, N, k)
     yᵦ_N2, y_c_N2 = EulerStepMethod(xₐ, yₐ, xᵦ, N+2, k)
