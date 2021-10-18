@@ -64,14 +64,14 @@ end
 
 ϵ_Euler(1.0, 4.0, 5.0, 2, 0.25)
 
-## Repeat until ϵ < δ
+## Repeat until ϵ < δ: Euler Step Method
 function find_N_Euler(δ::Float64, k::Float64)
     j = 0
     ϵ_c = 1.0
     ϵᵦ = 1.0
     N = 2
-    while ϵ_c > δ || ϵᵦ > δ
-        ϵ_Euler(1.0, 4.0, 5.0, N, k)
+    while (ϵ_c > δ || ϵᵦ > δ)
+        ϵᵦ, ϵ_c = ϵ_Euler(1.0, 4.0, 5.0, N, k)
         N = N + 2
         if N > 100
             break
@@ -81,3 +81,51 @@ function find_N_Euler(δ::Float64, k::Float64)
 end
 
 find_N_Euler(0.001, 0.25)
+
+
+
+## Repeat until ϵ < δ: Predictor-Correction Method
+function find_N_pcm(δ::Float64, k::Float64)
+    j = 0
+    ϵ_c = 1.0
+    ϵᵦ = 1.0
+    N = 2
+    while (ϵ_c > δ || ϵᵦ > δ)
+        ϵᵦ, ϵ_c = ϵ_pcm(1.0, 4.0, 5.0, N, k)
+        N = N + 2
+        if N > 100
+            break
+        end
+    end
+    return N
+end
+
+find_N_pcm(0.001, 0.25)
+
+## Making matrix for the outputs with repeatation: Euler Step Method
+function Euler_Matrix_Filling(k::Float64)
+    Euler_matrix = zeros(find_N_Euler(0.001, k)÷2, 5)
+    for i in 1:find_N_Euler(0.001, k)÷2
+        Euler_matrix[i, 1] = 2*i
+        Euler_matrix[i, 2], Euler_matrix[i, 3] = EulerStepMethod(1.0, 4.0, 5.0, 2*i, k)
+        Euler_matrix[i, 4], Euler_matrix[i, 5] = ϵ_Euler(1.0, 4.0, 5.0, 2*i, k)
+    end
+    return Euler_matrix
+end
+
+Euler_Matrix_Filling(0.25)
+Euler_Matrix_Filling(0.5)
+
+## Making matrix for the outputs with repeatation: Perdictor-Correction Method
+function PCM_Matrix_Filling(k::Float64)
+    PCM_matrix = zeros(find_N_pcm(0.001, k)÷2, 5)
+    for i in 1:find_N_pcm(0.001, k)÷2
+        PCM_matrix[i, 1] = 2*i
+        PCM_matrix[i, 2], PCM_matrix[i, 3] = pcm(1.0, 4.0, 5.0, 2*i, k)
+        PCM_matrix[i, 4], PCM_matrix[i, 5] = ϵ_pcm(1.0, 4.0, 5.0, 2*i, k)
+    end
+    return PCM_matrix
+end
+
+PCM_Matrix_Filling(0.25)
+PCM_Matrix_Filling(0.5)
