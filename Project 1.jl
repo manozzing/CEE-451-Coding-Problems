@@ -60,24 +60,27 @@ function ShootingMethod(η₁::Float64, ηₙ₊₁::Float64, F₁::Float64, G�
 end
 
 # ╔═╡ 88838cbe-f1c7-4261-a1b4-c28d0b171f33
-md"### Plot for result"
+md"### Plot for result when G converges to 1.0"
+
+# ╔═╡ 5ff234d2-a68f-4902-a5f8-a1c50d327ffc
+md" s₀ = 0.328573, N = 50"
 
 # ╔═╡ cadbfa94-cdfe-4fad-a31f-c97f81eb70a6
 sᴺᴱᵂ = ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1]
 
 # ╔═╡ 5aed2169-1e7d-4a35-8c87-ce76357ff73f
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[3]), xlabel = "η", ylabel = "F(η)", legend=false, title="s₀=0.328573, N=50")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[3]), xlabel = "η", ylabel = "F(η)", legend=false, title="F(η) with η ∈ [0.0, 10.0]")
 end
 
 # ╔═╡ a4e5ce91-5c3e-49fa-890d-ebefdb2e3672
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4]), xlabel = "η", ylabel = "G(η)", legend=false, title="s₀=0.328573, N=50")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4]), xlabel = "η", ylabel = "G(η)", legend=false, title="G(η) with η ∈ [0.0, 10.0]")
 end
 
 # ╔═╡ 011849e1-166c-4406-81e5-63651f865677
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[5]), xlabel = "η", ylabel = "H(η)", legend=false, title="s₀=0.328573, N=50")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[5]), xlabel = "η", ylabel = "H(η)", legend=false, title="H(η) with η ∈ [0.0, 10.0]")
 end
 
 # ╔═╡ 3c916378-d83a-444a-a33a-7e279df9f06b
@@ -85,7 +88,7 @@ md"### u/U as a function of η"
 
 # ╔═╡ f4acebc4-85fe-40f5-b3f0-9aafa4e2cc58
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4]), xlabel = "η", ylabel = "u/U", legend=false, title="s₀=0.328573, N=50")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4]), xlabel = "η", ylabel = "u/U", legend=false, title="u(η)/U with η ∈ [0.0, 10.0]")
 end
 
 # ╔═╡ aad4f687-e681-426e-b8de-04e6f0c5aab1
@@ -93,6 +96,9 @@ md"### When u/U = 0.99, η = ?"
 
 # ╔═╡ fd7d3b3a-3d1c-4f61-8b57-99cffa149c44
 ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4][248]
+
+# ╔═╡ 61ba9db7-bc09-483f-9bb6-386bbd65963c
+md" in 248th step, u/U ≈ 0.99"
 
 # ╔═╡ 0bfdb7b2-db37-48da-af14-f303deb02dc3
 η₉₉ = ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2][248]
@@ -119,22 +125,25 @@ md"### When L = 0.2 m, b = 0.1 m , ρ = 1.24 kg/m³, ν = 1.5 * 10⁻⁵ m²/s, 
 md" Fd = 0.248*s√(0.000003*U³) "
 
 # ╔═╡ d8386d78-1b3f-4a3c-a134-9e8d45198c23
-md" U = 0.01 m/s "
+md"When U = 0.01 m/s, Fd = (in kg*m/s² or N) "
 
 # ╔═╡ cb180882-11fe-44cd-828a-5090705d0d4e
 0.248 * ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1] * 0.000003^0.5 * 0.01^1.5
 
 # ╔═╡ 1776fdff-c538-47f5-a80e-0eb0559cb049
-md" U = 0.1 m/s "
+md"When U = 0.1 m/s, Fd = (in kg*m/s² or N)"
 
 # ╔═╡ 5e47ccd2-6eb8-4bd7-83c6-cfc7205c061c
 0.248 * ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1] * 0.000003^0.5 * 0.1^1.5
 
 # ╔═╡ c44aaa2a-52b5-43b8-b0ed-082f8df7c257
-md" U = 0.5 m/s "
+md"When U = 0.5 m/s, Fd = (in kg*m/s² or N) "
 
 # ╔═╡ f4cf5130-09e7-4d61-a79d-397ebe767c2d
 0.248 * ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1] * 0.000003^0.5 * 0.5^1.5
+
+# ╔═╡ 739be0fc-6aaa-49c9-b653-7cb3b7210523
+md"### Thank you very much! I enjoyed your lecture during this semester!"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1002,6 +1011,7 @@ version = "0.9.1+5"
 # ╟─5bd9b1e1-6c6b-4cff-8136-cedb1a2282d4
 # ╠═859d650b-6bb7-4de9-9613-35ba91c12a77
 # ╟─88838cbe-f1c7-4261-a1b4-c28d0b171f33
+# ╟─5ff234d2-a68f-4902-a5f8-a1c50d327ffc
 # ╠═cadbfa94-cdfe-4fad-a31f-c97f81eb70a6
 # ╠═5aed2169-1e7d-4a35-8c87-ce76357ff73f
 # ╠═a4e5ce91-5c3e-49fa-890d-ebefdb2e3672
@@ -1010,6 +1020,7 @@ version = "0.9.1+5"
 # ╠═f4acebc4-85fe-40f5-b3f0-9aafa4e2cc58
 # ╟─aad4f687-e681-426e-b8de-04e6f0c5aab1
 # ╠═fd7d3b3a-3d1c-4f61-8b57-99cffa149c44
+# ╟─61ba9db7-bc09-483f-9bb6-386bbd65963c
 # ╠═0bfdb7b2-db37-48da-af14-f303deb02dc3
 # ╟─34eaedb2-03bb-4b7d-9c7e-07c5076145a9
 # ╟─319787c7-a301-4716-a25b-1bcc70da2060
@@ -1024,5 +1035,6 @@ version = "0.9.1+5"
 # ╠═5e47ccd2-6eb8-4bd7-83c6-cfc7205c061c
 # ╟─c44aaa2a-52b5-43b8-b0ed-082f8df7c257
 # ╠═f4cf5130-09e7-4d61-a79d-397ebe767c2d
+# ╟─739be0fc-6aaa-49c9-b653-7cb3b7210523
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
