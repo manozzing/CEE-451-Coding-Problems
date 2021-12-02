@@ -4,269 +4,137 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ df460b00-441e-4e50-b690-1458203a85dc
+# ╔═╡ 28e5b978-55ab-4bcd-8062-8fa9fadd2df0
 begin 
 	using Plots
 end
 
-# ╔═╡ 831adfc0-3ba2-11ec-0d15-23302441f19e
-md"# CEE 451 Coding 4: _Shooting_ _Method_
+# ╔═╡ 42430f12-52fc-11ec-327a-d18cd06b3842
+md"# CEE 451 Project: _Laminar_ _Boundary_ _Layer_ _on_ _a_ _Flat_ _Plate_
 
 Manho Park, 1st year PhD Student, Environmental Engineering Science Program"
 
-# ╔═╡ 9fd45e34-8db2-4e23-8cda-7dfd1c6836cb
+# ╔═╡ 9377297b-69bc-401f-82b3-b90eeab8a735
 md"### Installing packages for calculation and visualization"
 
-# ╔═╡ 15ee9968-d75d-4041-b047-91511ed54ea8
-md"## Problem 1. _f''_ + _f_ = 0, _f_(0) = 0, _f_(1)=1"
+# ╔═╡ 53f79980-9da6-4bdb-8956-d76cc855d186
+md"## Problem 1. _F'''_ = _-½FF''_, _F_(0) = 0, _F'_(0) = 0, _F_(∞)=1"
 
-# ╔═╡ 1a9d9540-ad0e-4089-a1a2-73736d412498
+# ╔═╡ 5bd9b1e1-6c6b-4cff-8136-cedb1a2282d4
 md"### Defining Function for Shooting Method"
 
-# ╔═╡ 0e62eaa6-6f6e-4816-8b82-9f8636e19359
-function ShootingMethod(x₁::Float64, xₙ₊₁::Float64, f₁::Float64, g₁::Float64, F₁::Float64, G₁::Float64, N::Int64)
-    Δx = (xₙ₊₁-x₁)/N
-    x = zeros(N+1)
-    f = zeros(N+1)
-    g = zeros(N+1)
-    F = zeros(N+1)
-    G = zeros(N+1)
+# ╔═╡ 859d650b-6bb7-4de9-9613-35ba91c12a77
+function ShootingMethod(η₁::Float64, ηₙ₊₁::Float64, F₁::Float64, G₁::Float64, H₁::Float64, Fᵥ₁::Float64, Gᵥ₁::Float64, Hᵥ₁::Float64, N::Int64)
+    Δη = (ηₙ₊₁-η₁)/N
+    η = zeros(10*N+1)
+    F = zeros(10*N+1)
+    G = zeros(10*N+1)
+	H = zeros(10*N+1)
+    Fᵥ = zeros(10*N+1)
+    Gᵥ = zeros(10*N+1)
+	Hᵥ = zeros(10*N+1)
 
-    x[1] = x₁
-    f[1] = f₁
-    g[1] = g₁
+    η[1] = η₁
     F[1] = F₁
     G[1] = G₁
+	H[1] = H₁
+    Fᵥ[1] = Fᵥ₁
+    Gᵥ[1] = Gᵥ₁
+	Hᵥ[1] = Hᵥ₁
 
-    s = g₁
+    s = H₁
 
-    for i in 1:N
-        x[i+1] = x[i] + Δx
-        f[i+1] = f[i] + g[i]*Δx
-        g[i+1] = g[i] - f[i]*Δx
-        F[i+1] = F[i] + G[i]*Δx
-        G[i+1] = G[i] - F[i]*Δx
+    for i in 1:10*N
+        η[i+1] = η[i] + Δη
+        F[i+1] = F[i] + G[i]*Δη
+        G[i+1] = G[i] + H[i]*Δη
+		H[i+1] = H[i] - 0.5*F[i]*H[i]*Δη
+        Fᵥ[i+1] = Fᵥ[i] + G[i]*Δη
+        Gᵥ[i+1] = Gᵥ[i] + H[i]*Δη
+		Hᵥ[i+1] = Hᵥ[i] - 0.5*F[i]*Hᵥ[i]*Δη - 0.5*Fᵥ[i]*H[i]*Δη
     end
     
-    sᴺᴱᵂ = s - (f[N+1]-1)/F[N+1]
+    sᴺᴱᵂ = s - (G[10*N+1]-1)/Gᵥ[10*N+1]
 
-    return sᴺᴱᵂ, x, f, g, F, G
+    return sᴺᴱᵂ, η, F, G, H, Fᵥ, Gᵥ, Hᵥ
 end
 
-# ╔═╡ c1893a8d-d50b-4134-a2d1-9c3733401688
-md"### Plots for two different initial guesses of _s_ and two different numbers of interval _N_"
+# ╔═╡ 88838cbe-f1c7-4261-a1b4-c28d0b171f33
+md"### Plot for result"
 
-# ╔═╡ f5b0c812-8b8d-47db-bc4b-babb51db74fd
+# ╔═╡ cadbfa94-cdfe-4fad-a31f-c97f81eb70a6
+sᴺᴱᵂ = ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1]
+
+# ╔═╡ 5aed2169-1e7d-4a35-8c87-ce76357ff73f
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 20)[2:3]), xlabel = "x", ylabel = "f(x)", legend=false, title="s₀=1, N=20")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[3]), xlabel = "η", ylabel = "F(η)", legend=false, title="s₀=0.328573, N=50")
 end
 
-# ╔═╡ ce064bd8-3075-4262-809a-40ee735deb47
+# ╔═╡ a4e5ce91-5c3e-49fa-890d-ebefdb2e3672
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 5.0, 0.0, 1.0, 20)[2:3]), xlabel = "x", ylabel = "f(x)", legend=false, title="s₀=5, N=20")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4]), xlabel = "η", ylabel = "G(η)", legend=false, title="s₀=0.328573, N=50")
 end
 
-# ╔═╡ 0f2a0623-391c-4c73-9c36-720b4bd9d13e
+# ╔═╡ 011849e1-166c-4406-81e5-63651f865677
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 80)[2:3]), xlabel = "x", ylabel = "f(x)", legend=false, title="s₀=1, N=80")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[5]), xlabel = "η", ylabel = "H(η)", legend=false, title="s₀=0.328573, N=50")
 end
 
-# ╔═╡ b3b2e0f6-97bc-42a4-8272-d4a339be8fcb
+# ╔═╡ 3c916378-d83a-444a-a33a-7e279df9f06b
+md"### u/U as a function of η"
+
+# ╔═╡ f4acebc4-85fe-40f5-b3f0-9aafa4e2cc58
 let
-	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 5.0, 0.0, 1.0, 80)[2:3]), xlabel = "x", ylabel = "f(x)", legend=false, title="s₀=5, N=80")
+	plot(scatter(ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2], ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4]), xlabel = "η", ylabel = "u/U", legend=false, title="s₀=0.328573, N=50")
 end
 
-# ╔═╡ 4146aebd-c753-4bea-9c7d-7dd58802cec5
-md"### Number of iteration _M_ for convergence of _s_"
+# ╔═╡ aad4f687-e681-426e-b8de-04e6f0c5aab1
+md"### When u/U = 0.99, η = ?"
 
-# ╔═╡ 8641ec45-bc12-4fad-957a-46f1394f2c14
-## Find M for Repeatation ϵₛ < δ
-function find_M_Shooting(s::Float64, δ::Float64, N::Int64)
-    ss = zeros(10001)
-    ss[1] = s
-    
-    for i in 1:10000
-        ss[i+1] = ShootingMethod(0.0, 1.0, 0.0, ss[i], 0.0, 1.0, N)[1]
+# ╔═╡ fd7d3b3a-3d1c-4f61-8b57-99cffa149c44
+ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[4][248]
 
-        if abs(2*(ss[i+1]-ss[i])/(ss[i+1]+ss[i])) < δ
-            return i, ss[i+1]
-            break
-        end
-    end
-end
+# ╔═╡ 0bfdb7b2-db37-48da-af14-f303deb02dc3
+η₉₉ = ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[2][248]
 
-# ╔═╡ e2296ab4-d135-49b6-bbf8-f2c588686bc9
-# initial guess of s = 3.3, δ = 0.01, N = 100 
-M, s = find_M_Shooting(3.3, 0.01, 100)
+# ╔═╡ 34eaedb2-03bb-4b7d-9c7e-07c5076145a9
+md" δ(x) = η₉₉√(νx/U)"
 
-# ╔═╡ 5e5ede02-4b96-43c3-b632-b99efe87fd9e
-md"### Number of discretization _N_ for convergence of _s_"
+# ╔═╡ 319787c7-a301-4716-a25b-1bcc70da2060
+md" τ₀=ρs√(νU³/x)"
 
-# ╔═╡ 6ef212b1-39e6-4713-8e5c-9aa88b32764c
-function ϵ_Shooting_N(s::Float64, N::Int64)
-    s1 = ShootingMethod(0.0, 1.0, 0.0, s, 0.0, 1.0, N)[1]
-    s2 = ShootingMethod(0.0, 1.0, 0.0, s, 0.0, 1.0, N+1)[1]
-    ϵₛ = abs(2*(s2-s1)/(s2+s1))
-    return ϵₛ, s2
-end
+# ╔═╡ f164cad9-7889-41e7-9936-648d3bfa2330
+md" τ₀/ρU² = s√(ν/Ux) "
 
-# ╔═╡ 76cec46d-9df0-44fa-ae20-1acaa0b7d767
-function find_N_Shooting(s::Float64, δ::Float64)
-    ϵₛ = 1.0
-    N = 2
-    while (ϵₛ > δ)
-        ϵₛ = ϵ_Shooting_N(s, N)[1]
-        N = N + 1
-    end
-    return N, ϵ_Shooting_N(s, N)[2]
-end
+# ╔═╡ 931eb9e3-83e9-458d-bde4-45e3efd975a7
+md" Fd = 2bρs√(νU³L) "
 
-# ╔═╡ 53547653-72d9-44de-87af-1c2a1e117d14
-find_N_Shooting(1.0, 0.0001)
+# ╔═╡ 0b724ea1-32f3-4b61-8e5b-68d5a2e4b425
+md" Fd/(ρbLU²) = 2s/√Re"
 
-# ╔═╡ 15cb39e3-b0c3-4f46-9c6b-92a4ca580ab9
-md"## Problem 2. _f''_ + _f_²_x_ = 0, _f_(0) = 0, _f_(1)=2"
+# ╔═╡ 3b10362f-80c4-4fe1-b306-4d6121442859
+md"### When L = 0.2 m, b = 0.1 m , ρ = 1.24 kg/m³, ν = 1.5 * 10⁻⁵ m²/s, Fd = ?"
 
-# ╔═╡ cf740ea1-a0e0-4049-91fa-9eaddcfcb1c9
-md"### Formulation"
+# ╔═╡ 409751d2-4da6-4473-853b-0f2c7b7b5dd4
+md" Fd = 0.248*s√(0.000003*U³) "
 
-# ╔═╡ ec179ba1-3d0d-4b80-ab8f-3663fdd31cf4
-md"
-Initial formulations:
+# ╔═╡ d8386d78-1b3f-4a3c-a134-9e8d45198c23
+md" U = 0.01 m/s "
 
-f'' + f²x = 0, f(0) = 0, f(1) = 2
+# ╔═╡ cb180882-11fe-44cd-828a-5090705d0d4e
+0.248 * ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1] * 0.000003^0.5 * 0.01^1.5
 
-Let g = f' then, 
+# ╔═╡ 1776fdff-c538-47f5-a80e-0eb0559cb049
+md" U = 0.1 m/s "
 
-g' = f'' = -f²x
+# ╔═╡ 5e47ccd2-6eb8-4bd7-83c6-cfc7205c061c
+0.248 * ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1] * 0.000003^0.5 * 0.1^1.5
 
-where, f(0) = 0, and g(0) = s
+# ╔═╡ c44aaa2a-52b5-43b8-b0ed-082f8df7c257
+md" U = 0.5 m/s "
 
-"
-
-# ╔═╡ 5fc71439-b5ef-4c4d-b3c2-5607a46f2334
-md"
-Variational parameters:
-
-F = ∂f/∂s, G = ∂g/∂s
-
-From df/dx = g, ∂(df/dx)/∂s = d(∂f/∂s)/dx = dF/dx = ∂g/∂s = G
-
-∴ dF/dx = G
-
-From dg/dx = -f²x, ∂(dg/dx)/∂s = d(∂g/∂s)/dx = dG/dx = ∂(-f²x)/∂s = -2fx∂f/∂s = -2fFx
-
-∴ dG/dx = -2fFx
-"
-
-# ╔═╡ 8fd06679-e3a2-4955-ab6d-a450bfdbea17
-md"
-Formulation of shooting method:
-
-fᵢ₊₁ = fᵢ + gᵢΔx
-
-gᵢ₊₁ = gᵢ - fᵢ²xᵢΔx
-
-Fᵢ₊₁ = Fᵢ + GᵢΔx
-
-Gᵢ₊₁ = Gᵢ - 2fᵢFᵢxᵢΔx
-
-where, boundary conditions are:
-
-f(0) = 0, g(0) = s, F(0) = 0, G(0) = 1
-
-"
-
-# ╔═╡ a0d4f4b7-c1b5-4e3d-8c72-6c127db04125
-md"### Defining function for shooting method to solve problem 2"
-
-# ╔═╡ c0b8b25b-d739-4312-89b2-4755fce5d26c
-function ShootingMethod_2(x₁::Float64, xₙ₊₁::Float64, f₁::Float64, g₁::Float64, F₁::Float64, G₁::Float64, N::Int64)
-    Δx = (xₙ₊₁-x₁)/N
-    x = zeros(N+1)
-    f = zeros(N+1)
-    g = zeros(N+1)
-    F = zeros(N+1)
-    G = zeros(N+1)
-
-    x[1] = x₁
-    f[1] = f₁
-    g[1] = g₁
-    F[1] = F₁
-    G[1] = G₁
-
-    s = g₁
-
-    for i in 1:N
-        x[i+1] = x[i] + Δx
-        f[i+1] = f[i] + g[i]*Δx
-        g[i+1] = g[i] - f[i]^2*x[i]*Δx
-        F[i+1] = F[i] + G[i]*Δx
-        G[i+1] = G[i] - 2*f[i]*F[i]*x[i]*Δx
-    end
-    
-    sᴺᴱᵂ = s - (f[N+1]-2)/F[N+1]
-
-    return sᴺᴱᵂ, x, f, g, F, G
-end
-
-# ╔═╡ 8d4a26db-2b2a-4b94-a9fb-d55265fe3c1c
-md"### Number of discretization _N_ for convergence of _s_"
-
-# ╔═╡ 5ab41d09-58b3-455c-add1-c401d3dcaedf
-function ϵ_Shooting_2_N(s::Float64, N::Int64)
-    s1 = ShootingMethod_2(0.0, 1.0, 0.0, s, 0.0, 1.0, N)[1]
-    s2 = ShootingMethod_2(0.0, 1.0, 0.0, s, 0.0, 1.0, N+1)[1]
-    ϵₛ = abs(2*(s2-s1)/(s2+s1))
-    return ϵₛ, s2
-end
-
-# ╔═╡ 03066f9a-d43c-4589-b364-22ea23867092
-function find_N_Shooting_2(s::Float64, δ::Float64)
-    ϵₛ = 1.0
-    N = 2
-    while (ϵₛ > δ)
-        ϵₛ = ϵ_Shooting_2_N(s, N)[1]
-        N = N + 1
-    end
-    return N, ϵ_Shooting_2_N(s, N)[2]
-end
-
-# ╔═╡ c71ce6fd-0afc-4b0e-bfa7-7fcc15e4b87e
-find_N_Shooting_2(1.0, 0.0001)
-
-# ╔═╡ e21ded09-4bf5-4b01-80f9-5aaccf3dd715
-md"### Number of iteration _M_ for convergence of _s_"
-
-# ╔═╡ 4871ed7c-943e-4897-991e-0bb343fa7e04
-function find_M_Shooting_2(s::Float64, δ::Float64, N::Int64)
-    ss = zeros(10001)
-    ss[1] = s
-    
-    for i in 1:10000
-        ss[i+1] = ShootingMethod_2(0.0, 1.0, 0.0, ss[i], 0.0, 1.0, N)[1]
-
-        if abs(2*(ss[i+1]-ss[i])/(ss[i+1]+ss[i])) < δ
-            return i, ss[i+1]
-            break
-        end
-    end
-end
-
-# ╔═╡ 28bfbbda-0fdd-4cdd-a439-ee5b39804772
-# initial guess of s = 3.3, δ = 0.01, N = 100 
-M2, s2 = find_M_Shooting_2(3.3, 0.01, 100)
-
-# ╔═╡ e29cabfa-7545-46e2-be57-ff686681a1fc
-md"### Plot of the result f(x) with N > 61 and s = 2.22236"
-
-# ╔═╡ 777b79b0-a56a-41a4-b2a0-74293547670f
-let
-	plot(scatter(ShootingMethod_2(0.0, 1.0, 0.0, 2.14712, 0.0, 1.0, 80)[2:3]), xlabel = "x", ylabel = "f(x)", legend=false, title="s₀=2.22236, N=80")
-end
-
-# ╔═╡ b504f83b-dd8a-45e9-bb4d-2da9a927d53d
-md"### Thank you!"
+# ╔═╡ f4cf5130-09e7-4d61-a79d-397ebe767c2d
+0.248 * ShootingMethod(0.0, 1.0, 0.0, 0.0, 0.328573, 0.0, 0.0, 1.0, 50)[1] * 0.000003^0.5 * 0.5^1.5
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -274,7 +142,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
-Plots = "~1.23.2"
+Plots = "~1.24.3"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -310,9 +178,15 @@ version = "1.16.1+0"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "3533f5a691e60601fe60c90d8bc47a27aa2907ec"
+git-tree-sha1 = "f885e7e7c124f8c92650d61b9477b9ac2ee607dd"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.11.0"
+version = "1.11.1"
+
+[[ChangesOfVariables]]
+deps = ["LinearAlgebra", "Test"]
+git-tree-sha1 = "9a1d594397670492219635b35a3d830b04730d62"
+uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
+version = "0.1.1"
 
 [[ColorSchemes]]
 deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random"]
@@ -448,9 +322,9 @@ version = "3.3.5+1"
 
 [[GR]]
 deps = ["Base64", "DelimitedFiles", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Printf", "Random", "Serialization", "Sockets", "Test", "UUIDs"]
-git-tree-sha1 = "d189c6d2004f63fd3c91748c458b09f26de0efaa"
+git-tree-sha1 = "30f2b340c2fff8410d89bfcdc9c0a6dd661ac5f7"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.61.0"
+version = "0.62.1"
 
 [[GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Pkg", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
@@ -472,9 +346,9 @@ version = "0.21.0+0"
 
 [[Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "7bf67e9a481712b3dbe9cb3dac852dc4b1162e02"
+git-tree-sha1 = "74ef6288d071f58033d54fd6708d4bc23a8b8972"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.68.3+0"
+version = "2.68.3+1"
 
 [[Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -489,15 +363,15 @@ version = "1.0.2"
 
 [[HTTP]]
 deps = ["Base64", "Dates", "IniFile", "Logging", "MbedTLS", "NetworkOptions", "Sockets", "URIs"]
-git-tree-sha1 = "14eece7a3308b4d8be910e265c724a6ba51a9798"
+git-tree-sha1 = "0fa77022fe4b511826b39c894c90daf5fce3334a"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "0.9.16"
+version = "0.9.17"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
-git-tree-sha1 = "8a954fed8ac097d5be04921d595f741115c1b2ad"
+git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
-version = "2.8.1+0"
+version = "2.8.1+1"
 
 [[IniFile]]
 deps = ["Test"]
@@ -511,9 +385,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[InverseFunctions]]
 deps = ["Test"]
-git-tree-sha1 = "f0c6489b12d28fb4c2103073ec7452f3423bd308"
+git-tree-sha1 = "a7254c0acd8e62f1ac75ad24d5db43f5f19f3c65"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
-version = "0.1.1"
+version = "0.1.2"
 
 [[IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -561,9 +435,9 @@ uuid = "dd4b983a-f0e5-5f8d-a1b7-129d4a5fb1ac"
 version = "2.10.1+0"
 
 [[LaTeXStrings]]
-git-tree-sha1 = "c7f1c695e06c01b95a67f0cd1d34994f3e7db104"
+git-tree-sha1 = "f2355693d6778a178ade15952b7ac47a4ff97996"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.2.1"
+version = "1.3.0"
 
 [[Latexify]]
 deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "Printf", "Requires"]
@@ -643,10 +517,10 @@ deps = ["Libdl"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[LogExpFunctions]]
-deps = ["ChainRulesCore", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "6193c3815f13ba1b78a51ce391db8be016ae9214"
+deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
+git-tree-sha1 = "be9eef9f9d78cecb6f262f3c10da151a6c5ab827"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.4"
+version = "0.3.5"
 
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
@@ -727,9 +601,9 @@ version = "8.44.0+0"
 
 [[Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "d911b6a12ba974dabe2291c6d450094a7226b372"
+git-tree-sha1 = "ae4bbcadb2906ccc085cf52ac286dc1377dceccc"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.1.1"
+version = "2.1.2"
 
 [[Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -754,10 +628,10 @@ uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.0.15"
 
 [[Plots]]
-deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs"]
-git-tree-sha1 = "ca7d534a27b1c279f05cd094196cb70c35e3d892"
+deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun"]
+git-tree-sha1 = "d73736030a094e8d24fdf3629ae980217bf1d59d"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.23.2"
+version = "1.24.3"
 
 [[Preferences]]
 deps = ["TOML"]
@@ -784,9 +658,9 @@ deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[RecipesBase]]
-git-tree-sha1 = "44a75aa7a527910ee3d1751d1f0e4148698add9e"
+git-tree-sha1 = "6bf3f380ff52ce0832ddd3a2a7b9538ed1bcca7d"
 uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "1.1.2"
+version = "1.2.1"
 
 [[RecipesPipeline]]
 deps = ["Dates", "NaNMath", "PlotUtils", "RecipesBase"]
@@ -851,15 +725,15 @@ deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[StatsAPI]]
-git-tree-sha1 = "1958272568dc176a1d881acb797beb909c785510"
+git-tree-sha1 = "0f2aa8e32d511f758a2ce49208181f7733a0936a"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.0.0"
+version = "1.1.0"
 
 [[StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "eb35dcc66558b2dda84079b9a1be17557d32091a"
+git-tree-sha1 = "2bb0cb32026a66037360606510fca5984ccc6b75"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.33.12"
+version = "0.33.13"
 
 [[StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
@@ -903,6 +777,12 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
+[[UnicodeFun]]
+deps = ["REPL"]
+git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
+uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
+version = "0.4.1"
+
 [[Wayland_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg", "XML2_jll"]
 git-tree-sha1 = "3e61f0b86f90dacb0bc0e73a0c5a83f6a8636e23"
@@ -910,10 +790,10 @@ uuid = "a2964d1f-97da-50d4-b82a-358c7fce9d89"
 version = "1.19.0+0"
 
 [[Wayland_protocols_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Wayland_jll"]
-git-tree-sha1 = "2839f1c1296940218e35df0bbb220f2a79686670"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "66d72dc6fcc86352f01676e8f0f698562e60510f"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
-version = "1.18.0+4"
+version = "1.23.0+0"
 
 [[XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
@@ -1115,40 +995,34 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╠═831adfc0-3ba2-11ec-0d15-23302441f19e
-# ╠═9fd45e34-8db2-4e23-8cda-7dfd1c6836cb
-# ╠═df460b00-441e-4e50-b690-1458203a85dc
-# ╠═15ee9968-d75d-4041-b047-91511ed54ea8
-# ╠═1a9d9540-ad0e-4089-a1a2-73736d412498
-# ╠═0e62eaa6-6f6e-4816-8b82-9f8636e19359
-# ╠═c1893a8d-d50b-4134-a2d1-9c3733401688
-# ╠═f5b0c812-8b8d-47db-bc4b-babb51db74fd
-# ╠═ce064bd8-3075-4262-809a-40ee735deb47
-# ╠═0f2a0623-391c-4c73-9c36-720b4bd9d13e
-# ╠═b3b2e0f6-97bc-42a4-8272-d4a339be8fcb
-# ╠═4146aebd-c753-4bea-9c7d-7dd58802cec5
-# ╠═8641ec45-bc12-4fad-957a-46f1394f2c14
-# ╠═e2296ab4-d135-49b6-bbf8-f2c588686bc9
-# ╠═5e5ede02-4b96-43c3-b632-b99efe87fd9e
-# ╠═6ef212b1-39e6-4713-8e5c-9aa88b32764c
-# ╠═76cec46d-9df0-44fa-ae20-1acaa0b7d767
-# ╠═53547653-72d9-44de-87af-1c2a1e117d14
-# ╟─15cb39e3-b0c3-4f46-9c6b-92a4ca580ab9
-# ╟─cf740ea1-a0e0-4049-91fa-9eaddcfcb1c9
-# ╟─ec179ba1-3d0d-4b80-ab8f-3663fdd31cf4
-# ╟─5fc71439-b5ef-4c4d-b3c2-5607a46f2334
-# ╟─8fd06679-e3a2-4955-ab6d-a450bfdbea17
-# ╟─a0d4f4b7-c1b5-4e3d-8c72-6c127db04125
-# ╠═c0b8b25b-d739-4312-89b2-4755fce5d26c
-# ╠═8d4a26db-2b2a-4b94-a9fb-d55265fe3c1c
-# ╠═5ab41d09-58b3-455c-add1-c401d3dcaedf
-# ╠═03066f9a-d43c-4589-b364-22ea23867092
-# ╠═c71ce6fd-0afc-4b0e-bfa7-7fcc15e4b87e
-# ╠═e21ded09-4bf5-4b01-80f9-5aaccf3dd715
-# ╠═4871ed7c-943e-4897-991e-0bb343fa7e04
-# ╠═28bfbbda-0fdd-4cdd-a439-ee5b39804772
-# ╟─e29cabfa-7545-46e2-be57-ff686681a1fc
-# ╠═777b79b0-a56a-41a4-b2a0-74293547670f
-# ╟─b504f83b-dd8a-45e9-bb4d-2da9a927d53d
+# ╟─42430f12-52fc-11ec-327a-d18cd06b3842
+# ╟─9377297b-69bc-401f-82b3-b90eeab8a735
+# ╠═28e5b978-55ab-4bcd-8062-8fa9fadd2df0
+# ╟─53f79980-9da6-4bdb-8956-d76cc855d186
+# ╟─5bd9b1e1-6c6b-4cff-8136-cedb1a2282d4
+# ╠═859d650b-6bb7-4de9-9613-35ba91c12a77
+# ╟─88838cbe-f1c7-4261-a1b4-c28d0b171f33
+# ╠═cadbfa94-cdfe-4fad-a31f-c97f81eb70a6
+# ╠═5aed2169-1e7d-4a35-8c87-ce76357ff73f
+# ╠═a4e5ce91-5c3e-49fa-890d-ebefdb2e3672
+# ╠═011849e1-166c-4406-81e5-63651f865677
+# ╟─3c916378-d83a-444a-a33a-7e279df9f06b
+# ╠═f4acebc4-85fe-40f5-b3f0-9aafa4e2cc58
+# ╟─aad4f687-e681-426e-b8de-04e6f0c5aab1
+# ╠═fd7d3b3a-3d1c-4f61-8b57-99cffa149c44
+# ╠═0bfdb7b2-db37-48da-af14-f303deb02dc3
+# ╟─34eaedb2-03bb-4b7d-9c7e-07c5076145a9
+# ╟─319787c7-a301-4716-a25b-1bcc70da2060
+# ╟─f164cad9-7889-41e7-9936-648d3bfa2330
+# ╟─931eb9e3-83e9-458d-bde4-45e3efd975a7
+# ╟─0b724ea1-32f3-4b61-8e5b-68d5a2e4b425
+# ╟─3b10362f-80c4-4fe1-b306-4d6121442859
+# ╟─409751d2-4da6-4473-853b-0f2c7b7b5dd4
+# ╟─d8386d78-1b3f-4a3c-a134-9e8d45198c23
+# ╠═cb180882-11fe-44cd-828a-5090705d0d4e
+# ╟─1776fdff-c538-47f5-a80e-0eb0559cb049
+# ╠═5e47ccd2-6eb8-4bd7-83c6-cfc7205c061c
+# ╟─c44aaa2a-52b5-43b8-b0ed-082f8df7c257
+# ╠═f4cf5130-09e7-4d61-a79d-397ebe767c2d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
